@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>泰國旅遊規劃 Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F7F5F0; --surface: #FFFFFF; --border: rgba(0,0,0,0.08);
+    --text-primary: #1A1A1A; --text-secondary: #666; --text-tertiary: #999;
+    --teal: #1D9E75; --teal-light: #E1F5EE; --teal-dark: #085041;
+    --purple: #7F77DD; --purple-light: #EEEDFE; --purple-dark: #3C3489;
+    --amber: #EF9F27; --amber-light: #FAEEDA; --amber-dark: #633806;
+    --blue: #378ADD; --blue-light: #E6F1FB; --blue-dark: #0C447C;
+    --pink: #D4537E; --pink-light: #FBEAF0; --pink-dark: #72243E;
+    --green: #639922;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: var(--text-primary); min-height: 100vh; padding: 2rem 1.5rem; }
+  .container { max-width: 900px; margin: 0 auto; }
+  .header { display: flex; align-items: flex-end; gap: 16px; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
+  .header-emoji { font-size: 40px; line-height: 1; }
+  .header-title { font-family: 'DM Serif Display', serif; font-size: 28px; }
+  .header-sub { font-size: 13px; color: var(--text-tertiary); margin-top: 4px; }
+  .header-date { margin-left: auto; font-size: 12px; color: var(--text-tertiary); text-align: right; }
+  .section-title { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 12px; margin-top: 2rem; }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 2rem; }
+  .metric { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+  .metric-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; }
+  .metric-val { font-size: 26px; font-weight: 700; line-height: 1; }
+  .metric-sub { font-size: 11px; color: var(--text-tertiary); margin-top: 4px; }
+  .slot-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 2rem; }
+  .slot-card { border-radius: 12px; border: 1px solid; padding: 14px 16px; }
+  .slot-name { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+  .slot-date { font-size: 11px; margin-bottom: 8px; opacity: 0.75; }
+  .slot-count { font-size: 28px; font-weight: 700; line-height: 1; margin-bottom: 6px; }
+  .slot-who { font-size: 11px; opacity: 0.8; line-height: 1.5; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 1.25rem; }
+  .activity-row { display: flex; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px solid rgba(0,0,0,0.05); }
+  .activity-row:last-child { border-bottom: none; }
+  .activity-label { font-size: 13px; width: 115px; flex-shrink: 0; }
+  .bar-bg { flex: 1; height: 7px; background: #F0EDE8; border-radius: 4px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; }
+  .bar-val { font-size: 12px; color: var(--text-secondary); width: 28px; text-align: right; font-weight: 500; }
+  .person-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(195px, 1fr)); gap: 10px; margin-bottom: 1.25rem; }
+  .person-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+  .person-name { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+  .person-meta { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; }
+  .badge { display: inline-block; font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 99px; margin: 2px 2px 0 0; }
+  .badge-exp { background: var(--teal-light); color: var(--teal-dark); }
+  .badge-new { background: var(--blue-light); color: var(--blue-dark); }
+  .badge-info { background: var(--purple-light); color: var(--purple-dark); }
+  .badge-couple { background: var(--pink-light); color: var(--pink-dark); }
+  .slots-row { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+  .slot-pill { font-size: 10px; padding: 2px 8px; border-radius: 4px; border: 1px solid; font-weight: 500; }
+  .pill-A { background: var(--amber-light); color: var(--amber-dark); border-color: var(--amber); }
+  .pill-B { background: var(--teal-light); color: var(--teal-dark); border-color: var(--teal); }
+  .pill-C { background: var(--blue-light); color: var(--blue-dark); border-color: var(--blue); }
+  .pill-D { background: var(--purple-light); color: var(--purple-dark); border-color: var(--purple); }
+  .pill-E { background: var(--pink-light); color: var(--pink-dark); border-color: var(--pink); }
+  .person-note { font-size: 11px; color: var(--text-tertiary); margin-top: 6px; line-height: 1.5; }
+  .food-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+  .food-badge { font-size: 12px; padding: 5px 12px; border-radius: 99px; background: var(--surface); color: var(--text-secondary); border: 1px solid var(--border); }
+  .footnote { font-size: 11px; color: var(--text-tertiary); margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border); line-height: 1.8; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="header-emoji">🇹🇭</div>
+    <div>
+      <div class="header-title">泰國旅遊規劃 Dashboard</div>
+      <div class="header-sub">10 人 · 3 對情侶 · 5 個時段統計總覽</div>
+    </div>
+    <div class="header-date">整理日期<br>2025.04</div>
+  </div>
+
+  <div class="section-title">總覽</div>
+  <div class="metric-grid">
+    <div class="metric"><div class="metric-label">總人數</div><div class="metric-val">10</div><div class="metric-sub">3對情侶 + 4位單獨出發</div></div>
+    <div class="metric"><div class="metric-label">情侶組</div><div class="metric-val">3 對</div><div class="metric-sub">Kallen♡Fiona、順平×2、海哥♡曙曙</div></div>
+    <div class="metric"><div class="metric-label">最熱門時段</div><div class="metric-val">D / E</div><div class="metric-sub">各 6 人頭</div></div>
+    <div class="metric"><div class="metric-label">最熱門活動</div><div class="metric-val">美食</div><div class="metric-sub">平均 4.3 / 5 分</div></div>
+  </div>
+
+  <div class="section-title">時段報名人數</div>
+  <div class="slot-grid">
+    <div class="slot-card" style="background:var(--amber-light);border-color:var(--amber)">
+      <div class="slot-name" style="color:var(--amber-dark)">A — 天燈節</div>
+      <div class="slot-date" style="color:var(--amber-dark)">11/22 ～ 11/26-27</div>
+      <div class="slot-count" style="color:var(--amber-dark)">5</div>
+      <div class="slot-who" style="color:var(--amber-dark)">Kallen、Fiona♡、Connie、順平×2</div>
+    </div>
+    <div class="slot-card" style="background:var(--teal-light);border-color:var(--teal)">
+      <div class="slot-name" style="color:var(--teal-dark)">B — 天燈節</div>
+      <div class="slot-date" style="color:var(--teal-dark)">11/24 ～ 11/28</div>
+      <div class="slot-count" style="color:var(--teal-dark)">4</div>
+      <div class="slot-who" style="color:var(--teal-dark)">Arrow、Connie、順平×2</div>
+    </div>
+    <div class="slot-card" style="background:var(--blue-light);border-color:var(--blue)">
+      <div class="slot-name" style="color:var(--blue-dark)">C — 聖誕</div>
+      <div class="slot-date" style="color:var(--blue-dark)">12/25 ～ 12/29</div>
+      <div class="slot-count" style="color:var(--blue-dark)">5</div>
+      <div class="slot-who" style="color:var(--blue-dark)">Eugenia、Kallen、Fiona♡、Arrow、Connie</div>
+    </div>
+    <div class="slot-card" style="background:var(--purple-light);border-color:var(--purple)">
+      <div class="slot-name" style="color:var(--purple-dark)">D — 跨年</div>
+      <div class="slot-date" style="color:var(--purple-dark)">12/29 ～ 1/2</div>
+      <div class="slot-count" style="color:var(--purple-dark)">6</div>
+      <div class="slot-who" style="color:var(--purple-dark)">Kallen、Fiona♡、Arrow、Connie、海哥♡、曙曙♡</div>
+    </div>
+    <div class="slot-card" style="background:var(--pink-light);border-color:var(--pink)">
+      <div class="slot-name" style="color:var(--pink-dark)">E — 聖誕跨年</div>
+      <div class="slot-date" style="color:var(--pink-dark)">12/25 ～ 1/2</div>
+      <div class="slot-count" style="color:var(--pink-dark)">6</div>
+      <div class="slot-who" style="color:var(--pink-dark)">湘梅、Kallen、Fiona♡、Connie、海哥♡、曙曙♡</div>
+    </div>
+  </div>
+
+  <div class="section-title">活動興趣熱度（平均分 / 5）</div>
+  <div class="card">
+    <div class="activity-row"><div class="activity-label">🍜 夜市 / 美食</div><div class="bar-bg"><div class="bar-fill" style="width:86%;background:var(--teal)"></div></div><div class="bar-val">4.3</div></div>
+    <div class="activity-row"><div class="activity-label">🍹 夜生活 / 酒吧</div><div class="bar-bg"><div class="bar-fill" style="width:84%;background:var(--purple)"></div></div><div class="bar-val">4.2</div></div>
+    <div class="activity-row"><div class="activity-label">🏛️ 文化 / 景點</div><div class="bar-bg"><div class="bar-fill" style="width:82%;background:var(--blue)"></div></div><div class="bar-val">4.1</div></div>
+    <div class="activity-row"><div class="activity-label">🛍️ 購物</div><div class="bar-bg"><div class="bar-fill" style="width:76%;background:var(--amber)"></div></div><div class="bar-val">3.8</div></div>
+    <div class="activity-row"><div class="activity-label">🏄 水上活動</div><div class="bar-bg"><div class="bar-fill" style="width:72%;background:#5DCAA5"></div></div><div class="bar-val">3.6</div></div>
+    <div class="activity-row"><div class="activity-label">💆 SPA / 按摩</div><div class="bar-bg"><div class="bar-fill" style="width:68%;background:var(--pink)"></div></div><div class="bar-val">3.4</div></div>
+    <div class="activity-row"><div class="activity-label">🌿 戶外 / 自然</div><div class="bar-bg"><div class="bar-fill" style="width:62%;background:var(--green)"></div></div><div class="bar-val">3.1</div></div>
+  </div>
+
+  <div class="section-title">各人資料卡</div>
+  <div class="person-grid">
+
+    <div class="person-card">
+      <div class="person-name">湘梅（Mel）</div>
+      <div class="person-meta">1人出發 · 旅遊達人</div>
+      <span class="badge badge-exp">泰國老手</span>
+      <div class="slots-row"><span class="slot-pill pill-E">E 聖誕跨年</span></div>
+      <div class="person-note">9天8夜｜請4天｜不吃海鮮<br>點子多，可協助規劃</div>
+    </div>
+
+    <div class="person-card">
+      <div class="person-name">Eugenia</div>
+      <div class="person-meta">1人出發</div>
+      <span class="badge badge-exp">泰國老手</span>
+      <div class="slots-row"><span class="slot-pill pill-C">C 聖誕</span></div>
+      <div class="person-note">5天4夜｜請2天｜不吃辣</div>
+    </div>
+
+    <div class="person-card">
+      <div class="person-name">Kallen + Fiona ♡</div>
+      <div class="person-meta">情侶同行 · 2人</div>
+      <span class="badge badge-new">初訪泰國</span>
+      <span class="badge badge-info">愛查資料</span>
+      <span class="badge badge-couple">情侶</span>
+      <div class="slots-row">
+        <span class="slot-pill pill-A">A</span>
+        <span class="slot-pill pill-C">C</span>
+        <span class="slot-pill pill-D">D</span>
+        <span class="slot-pill pill-E">E</span>
+      </div>
+      <div class="person-note">想吃：綠咖喱、炒河粉、當地小吃<br>Kallen 少澱粉，不獵奇</div>
+    </div>
+
+    <div class="person-card">
+      <div class="person-name">Arrow</div>
+      <div class="person-meta">1人出發</div>
+      <span class="badge badge-new">初訪泰國</span>
+      <span class="badge badge-info">愛查資料</span>
+      <div class="slots-row">
+        <span class="slot-pill pill-B">B</span>
+        <span class="slot-pill pill-C">C</span>
+        <span class="slot-pill pill-D">D</span>
+      </div>
+      <div class="person-note">不吃牛</div>
+    </div>
+
+    <div class="person-card">
+      <div class="person-name">Connie</div>
+      <div class="person-meta">1人出發</div>
+      <span class="badge badge-exp">泰國老手</span>
+      <div class="slots-row">
+        <span class="slot-pill pill-A">A</span>
+        <span class="slot-pill pill-B">B</span>
+        <span class="slot-pill pill-C">C</span>
+        <span class="slot-pill pill-D">D</span>
+        <span class="slot-pill pill-E">E</span>
+      </div>
+      <div class="person-note">全時段配合｜無腦跟團｜中辣OK</div>
+    </div>
+
+    <div class="person-card">
+      <div class="person-name">海哥 + 曙曙 ♡</div>
+      <div class="person-meta">情侶同行 · 2人</div>
+      <span class="badge badge-new">初訪泰國</span>
+      <span class="badge badge-couple">情侶</span>
+      <div class="slots-row"><span class="slot-pill pill-D">12/30 ～ 1/3 *</span></div>
+      <div class="person-note">海哥不挑食｜曙曙不喝酒但可去酒吧<br>排班確認中</div>
+    </div>
+
+    <div class="person-card">
+      <div class="person-name">順平 + 另一半 ♡</div>
+      <div class="person-meta">情侶同行 · 2人</div>
+      <span class="badge badge-new">初訪泰國</span>
+      <span class="badge badge-couple">情侶</span>
+      <div class="slots-row">
+        <span class="slot-pill pill-A">A</span>
+        <span class="slot-pill pill-B">B</span>
+      </div>
+      <div class="person-note">全科目5星｜不挑食｜完全配合</div>
+    </div>
+
+  </div>
+
+  <div class="section-title">飲食備忘錄</div>
+  <div class="card">
+    <div class="food-grid">
+      <span class="food-badge">🚫 湘梅 — 不吃海鮮</span>
+      <span class="food-badge">🌶️ Eugenia — 不吃辣</span>
+      <span class="food-badge">🐄 Arrow — 不吃牛</span>
+      <span class="food-badge">🌶️ Connie — 中辣OK，不太辣</span>
+      <span class="food-badge">🍺 曙曙 — 不喝酒（可去酒吧）</span>
+      <span class="food-badge">🍚 Kallen — 少澱粉，不獵奇</span>
+      <span class="food-badge">✅ 海哥、順平×2、Fiona — 不挑食</span>
+    </div>
+  </div>
+
+  <div class="footnote">
+    * 海哥 & 曙曙 以 12/30（三）～ 1/3（日）為主，時段 E 僅供參考<br>
+    * Kallen + Fiona 時段取兩人聯集（A、C、D、E）<br>
+    * 順平為情侶同行，時段 A/B 各貢獻 2 個名額
+  </div>
+
+</div>
+</body>
+</html>
